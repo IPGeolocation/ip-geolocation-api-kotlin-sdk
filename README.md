@@ -448,25 +448,21 @@ try {
 
 <details>
 <summary>Can I use this SDK without an API key?</summary>
-
 Only for single lookup with paid-plan request-origin auth. Bulk lookup always requires an API key.
 </details>
 
 <details>
 <summary>Can I request XML and still get typed models?</summary>
-
 No. Typed methods only support JSON. Use `lookupIpGeolocationRaw` or `bulkLookupIpGeolocationRaw` for XML.
 </details>
 
 <details>
 <summary>Why are many response fields nullable?</summary>
-
 Nullable fields let the SDK preserve omitted fields instead of inventing default values for data the API did not send.
 </details>
 
 <details>
 <summary>Does domain lookup work on the free plan?</summary>
-
 No. Domain lookup is a paid-plan feature.
 </details>
 
