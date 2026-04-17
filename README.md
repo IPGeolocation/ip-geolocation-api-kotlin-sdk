@@ -51,9 +51,9 @@ Gradle Groovy:
 implementation 'io.ipgeolocation:ipgeolocation-kotlin-sdk:1.0.0'
 ```
 
-Maven Central coordinates: `io.ipgeolocation:ipgeolocation-kotlin-sdk`
-Package page: <https://central.sonatype.com/artifact/io.ipgeolocation/ipgeolocation-kotlin-sdk>
-GitHub repository: <https://github.com/IPGeolocation/ip-geolocation-api-kotlin-sdk>
+- Maven Central coordinates: `io.ipgeolocation:ipgeolocation-kotlin-sdk`
+- Package page: <https://central.sonatype.com/artifact/io.ipgeolocation/ipgeolocation-kotlin-sdk>
+- GitHub repository: <https://github.com/IPGeolocation/ip-geolocation-api-kotlin-sdk>
 
 All public types live under the `io.ipgeolocation.sdk` package. Your IDE will auto-import the classes used in the examples below.
 
