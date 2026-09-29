@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.1
+
+- Updated Jackson (`jackson-databind`, `jackson-core`, `jackson-module-kotlin`) from 2.21.1 to 2.21.7 to fix security vulnerabilities. No API or behavior changes.
+
 ## 1.0.0
 
 - First Kotlin SDK release for the IPGeolocation.io IP Location API.

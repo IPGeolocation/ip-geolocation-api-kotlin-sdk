@@ -35,20 +35,20 @@ Maven:
 <dependency>
   <groupId>io.ipgeolocation</groupId>
   <artifactId>ipgeolocation-kotlin-sdk</artifactId>
-  <version>1.0.0</version>
+  <version>1.0.1</version>
 </dependency>
 ```
 
 Gradle Kotlin DSL:
 
 ```kotlin
-implementation("io.ipgeolocation:ipgeolocation-kotlin-sdk:1.0.0")
+implementation("io.ipgeolocation:ipgeolocation-kotlin-sdk:1.0.1")
 ```
 
 Gradle Groovy:
 
 ```groovy
-implementation 'io.ipgeolocation:ipgeolocation-kotlin-sdk:1.0.0'
+implementation 'io.ipgeolocation:ipgeolocation-kotlin-sdk:1.0.1'
 ```
 
 - Maven Central coordinates: `io.ipgeolocation:ipgeolocation-kotlin-sdk`

@@ -5,7 +5,7 @@
 
   <groupId>io.ipgeolocation</groupId>
   <artifactId>ipgeolocation-kotlin-sdk</artifactId>
-  <version>1.0.0</version>
+  <version>1.0.1</version>
   <name>IPGeolocation Kotlin SDK</name>
   <description>Kotlin SDK for IP geolocation, company, ASN, VPN and proxy detection, timezone, user-agent parsing, and bulk IP intelligence with the IPGeolocation IP Location API.</description>
   <url>https://ipgeolocation.io/</url>
