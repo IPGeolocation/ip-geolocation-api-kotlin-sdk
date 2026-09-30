@@ -5,7 +5,7 @@
 
   <groupId>io.ipgeolocation</groupId>
   <artifactId>ipgeolocation-kotlin-sdk</artifactId>
-  <version>1.0.0</version>
+  <version>1.0.1</version>
   <name>IPGeolocation Kotlin SDK</name>
   <description>Kotlin SDK for IP geolocation, company, ASN, VPN and proxy detection, timezone, user-agent parsing, and bulk IP intelligence with the IPGeolocation IP Location API.</description>
   <url>https://ipgeolocation.io/</url>
@@ -45,7 +45,7 @@
     <dokka.version>2.2.0</dokka.version>
     <junit.version>5.11.4</junit.version>
     <assertj.version>3.27.7</assertj.version>
-    <jackson.version>2.21.1</jackson.version>
+    <jackson.version>2.21.7</jackson.version>
     <jacoco.version>0.8.12</jacoco.version>
     <jacoco.min.line.coverage>0.90</jacoco.min.line.coverage>
     <jacoco.min.branch.coverage>0.90</jacoco.min.branch.coverage>
