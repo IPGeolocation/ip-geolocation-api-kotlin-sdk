@@ -28,3 +28,5 @@ jobs:
           IPGEO_RUN_LIVE_TESTS: 'false'
           IPGEO_RUN_LIVE_HARDENING: 'false'
       - run: mvn --batch-mode --no-transfer-progress -Dtest=IpGeolocationClientIntegrationTest -DargLine=-Dsun.net.http.allowRestrictedHeaders=true test
+      - if: matrix.java == '21'
+        run: mvn --batch-mode --no-transfer-progress -Prelease -Dgpg.skip=true -DskipTests package

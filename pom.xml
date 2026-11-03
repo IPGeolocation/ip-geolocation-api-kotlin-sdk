@@ -328,6 +328,18 @@
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-source-plugin</artifactId>
             <version>${maven.source.plugin.version}</version>
+            <dependencies>
+              <dependency>
+                <groupId>org.codehaus.plexus</groupId>
+                <artifactId>plexus-archiver</artifactId>
+                <version>4.12.0</version>
+              </dependency>
+              <dependency>
+                <groupId>org.codehaus.plexus</groupId>
+                <artifactId>plexus-utils</artifactId>
+                <version>4.0.3</version>
+              </dependency>
+            </dependencies>
             <executions>
               <execution>
                 <id>attach-sources</id>
@@ -342,6 +354,48 @@
             <groupId>org.jetbrains.dokka</groupId>
             <artifactId>dokka-maven-plugin</artifactId>
             <version>${dokka.version}</version>
+            <dependencies>
+              <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-databind</artifactId>
+                <version>${jackson.version}</version>
+              </dependency>
+              <dependency>
+                <groupId>com.fasterxml.jackson.module</groupId>
+                <artifactId>jackson-module-kotlin</artifactId>
+                <version>${jackson.version}</version>
+              </dependency>
+              <dependency>
+                <groupId>com.google.guava</groupId>
+                <artifactId>guava</artifactId>
+                <version>33.7.2-jre</version>
+              </dependency>
+              <dependency>
+                <groupId>commons-io</groupId>
+                <artifactId>commons-io</artifactId>
+                <version>2.22.0</version>
+              </dependency>
+              <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-lang3</artifactId>
+                <version>3.18.0</version>
+              </dependency>
+              <dependency>
+                <groupId>org.apache.maven.shared</groupId>
+                <artifactId>maven-shared-utils</artifactId>
+                <version>3.4.2</version>
+              </dependency>
+              <dependency>
+                <groupId>org.codehaus.plexus</groupId>
+                <artifactId>plexus-archiver</artifactId>
+                <version>4.12.0</version>
+              </dependency>
+              <dependency>
+                <groupId>org.codehaus.plexus</groupId>
+                <artifactId>plexus-utils</artifactId>
+                <version>3.6.1</version>
+              </dependency>
+            </dependencies>
             <configuration>
               <moduleName>${project.artifactId}</moduleName>
               <jdkVersion>${maven.compiler.release}</jdkVersion>
@@ -371,6 +425,28 @@
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-gpg-plugin</artifactId>
             <version>${maven.gpg.plugin.version}</version>
+            <dependencies>
+              <dependency>
+                <groupId>org.bouncycastle</groupId>
+                <artifactId>bcpg-jdk18on</artifactId>
+                <version>1.85</version>
+              </dependency>
+              <dependency>
+                <groupId>org.bouncycastle</groupId>
+                <artifactId>bcprov-jdk18on</artifactId>
+                <version>1.85</version>
+              </dependency>
+              <dependency>
+                <groupId>org.bouncycastle</groupId>
+                <artifactId>bcutil-jdk18on</artifactId>
+                <version>1.85</version>
+              </dependency>
+              <dependency>
+                <groupId>org.codehaus.plexus</groupId>
+                <artifactId>plexus-utils</artifactId>
+                <version>4.0.3</version>
+              </dependency>
+            </dependencies>
             <executions>
               <execution>
                 <id>sign-artifacts</id>
@@ -386,6 +462,38 @@
             <groupId>org.sonatype.central</groupId>
             <artifactId>central-publishing-maven-plugin</artifactId>
             <version>${central.publishing.plugin.version}</version>
+            <dependencies>
+              <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-databind</artifactId>
+                <version>${jackson.version}</version>
+              </dependency>
+              <dependency>
+                <groupId>com.google.guava</groupId>
+                <artifactId>guava</artifactId>
+                <version>33.7.2-jre</version>
+              </dependency>
+              <dependency>
+                <groupId>org.codehaus.plexus</groupId>
+                <artifactId>plexus-utils</artifactId>
+                <version>3.6.1</version>
+              </dependency>
+              <dependency>
+                <groupId>org.apache.httpcomponents.client5</groupId>
+                <artifactId>httpclient5</artifactId>
+                <version>5.6.5</version>
+              </dependency>
+              <dependency>
+                <groupId>org.apache.httpcomponents.core5</groupId>
+                <artifactId>httpcore5</artifactId>
+                <version>5.4.4</version>
+              </dependency>
+              <dependency>
+                <groupId>org.apache.httpcomponents.core5</groupId>
+                <artifactId>httpcore5-h2</artifactId>
+                <version>5.4.4</version>
+              </dependency>
+            </dependencies>
             <extensions>true</extensions>
             <configuration>
               <publishingServerId>central</publishingServerId>
