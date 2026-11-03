@@ -10,6 +10,7 @@ internal object ObjectMappers {
     private fun createBaseMapper(): ObjectMapper {
         return jacksonObjectMapper()
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+            .configure(DeserializationFeature.FAIL_ON_TRAILING_TOKENS, true)
             .setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE)
     }
 

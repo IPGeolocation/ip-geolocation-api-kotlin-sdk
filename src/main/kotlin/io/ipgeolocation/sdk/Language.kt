@@ -12,7 +12,8 @@ enum class Language(val code: String) {
     IT("it"),
     KO("ko"),
     FA("fa"),
-    PT("pt");
+    PT("pt"),
+    AR("ar");
 
     companion object {
         fun fromCode(code: String): Language? = entries.firstOrNull { it.code == code.lowercase() }

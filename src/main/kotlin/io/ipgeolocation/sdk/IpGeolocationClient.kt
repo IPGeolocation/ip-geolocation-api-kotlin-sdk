@@ -7,6 +7,7 @@ import io.ipgeolocation.sdk.exceptions.RequestTimeoutException
 import io.ipgeolocation.sdk.exceptions.SerializationException
 import io.ipgeolocation.sdk.exceptions.TransportException
 import io.ipgeolocation.sdk.exceptions.ValidationException
+import io.ipgeolocation.sdk.internal.ErrorSanitizer
 import io.ipgeolocation.sdk.internal.HttpExecutor
 import io.ipgeolocation.sdk.internal.HttpRequestData
 import io.ipgeolocation.sdk.internal.HttpResponseData
@@ -17,6 +18,7 @@ import io.ipgeolocation.sdk.internal.SdkVersion
 import io.ipgeolocation.sdk.internal.UriBuilder
 import io.ipgeolocation.sdk.internal.mergeHeaders
 import io.ipgeolocation.sdk.internal.resolveUserAgentHeader
+import io.ipgeolocation.sdk.internal.timeoutMillis
 import io.ipgeolocation.sdk.model.BulkLookupResult
 import io.ipgeolocation.sdk.model.IpGeolocationResponse
 import java.io.Closeable
@@ -30,7 +32,8 @@ class IpGeolocationClient internal constructor(
     private val executor: HttpExecutor,
     private val objectMapper: ObjectMapper,
 ) : Closeable {
-    private val responseMapper: ResponseMapper = ResponseMapper(this.objectMapper)
+    private val errors = ErrorSanitizer(config.apiKey)
+    private val responseMapper: ResponseMapper = ResponseMapper(this.objectMapper, config.apiKey)
     @Volatile
     private var closed: Boolean = false
 
@@ -38,7 +41,11 @@ class IpGeolocationClient internal constructor(
         config: IpGeolocationClientConfig,
     ) : this(
         config = config,
-        executor = JavaNetHttpExecutor(config.connectTimeout, config.maxResponseBodyChars),
+        executor = JavaNetHttpExecutor(
+            config.connectTimeout,
+            config.maxResponseBodyChars,
+            requireOriginHeader = config.apiKey == null && config.requestOrigin != null,
+        ),
         objectMapper = ObjectMappers.default(),
     )
 
@@ -196,7 +203,7 @@ class IpGeolocationClient internal constructor(
         val payload = try {
             objectMapper.writeValueAsString(mapOf("ips" to request.ips))
         } catch (error: JsonProcessingException) {
-            throw SerializationException("Failed to serialize bulk lookup request body", error)
+            throw SerializationException("Failed to serialize bulk lookup request body", errors.cause(error))
         }
 
         val headers = mergeHeaders(
@@ -226,14 +233,17 @@ class IpGeolocationClient internal constructor(
             }
         } catch (error: SocketTimeoutException) {
             throw RequestTimeoutException(
-                "HTTP request timed out after ${request.timeout.toMillis()}ms while waiting for response data",
-                error,
+                "HTTP request timed out after ${timeoutMillis(request.timeout)}ms while waiting for response data",
+                errors.cause(error),
             )
         } catch (error: ApiException) {
-            throw error
+            throw responseMapper.sanitizeApiException(error)
         } catch (error: IOException) {
-            throw TransportException("HTTP transport error", error)
+            throw TransportException("HTTP transport error", errors.cause(error))
         } catch (error: RuntimeException) {
+            if (errors.containsKey(error)) {
+                throw TransportException("HTTP transport error", errors.cause(error))
+            }
             throw error
         }
 

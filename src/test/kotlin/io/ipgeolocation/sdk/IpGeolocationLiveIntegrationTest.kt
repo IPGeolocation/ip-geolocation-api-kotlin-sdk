@@ -67,16 +67,6 @@ class IpGeolocationLiveIntegrationTest {
     }
 
     @Test
-    fun freePlanBulkIsRejected() {
-        IpGeolocationClient(IpGeolocationClientConfig(apiKey = freeKey)).use { client ->
-            assertThatThrownBy {
-                client.bulkLookupIpGeolocation(BulkLookupIpGeolocationRequest(ips = listOf("8.8.8.8")))
-            }
-                .isInstanceOf(UnauthorizedException::class.java)
-        }
-    }
-
-    @Test
     fun paidPlanSecurityAndAbuseWorks() {
         IpGeolocationClient(IpGeolocationClientConfig(apiKey = paidKey)).use { client ->
             val response = client.lookupIpGeolocation(

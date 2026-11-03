@@ -1,6 +1,15 @@
 package io.ipgeolocation.sdk.internal
 
 import io.ipgeolocation.sdk.exceptions.ValidationException
+import java.time.Duration
+
+internal fun durationMillis(value: Duration): Long = try {
+    value.toMillis()
+} catch (_: ArithmeticException) {
+    Long.MAX_VALUE
+}
+
+internal fun timeoutMillis(value: Duration): Int = durationMillis(value).coerceIn(1L, Int.MAX_VALUE.toLong()).toInt()
 
 internal fun containsCrOrLf(value: String): Boolean = value.contains('\r') || value.contains('\n')
 

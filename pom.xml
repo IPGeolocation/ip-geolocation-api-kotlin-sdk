@@ -5,7 +5,7 @@
 
   <groupId>io.ipgeolocation</groupId>
   <artifactId>ipgeolocation-kotlin-sdk</artifactId>
-  <version>1.0.1</version>
+  <version>1.0.2</version>
   <name>IPGeolocation Kotlin SDK</name>
   <description>Kotlin SDK for IP geolocation, company, ASN, VPN and proxy detection, timezone, user-agent parsing, and bulk IP intelligence with the IPGeolocation IP Location API.</description>
   <url>https://ipgeolocation.io/</url>
@@ -45,13 +45,13 @@
     <dokka.version>2.2.0</dokka.version>
     <junit.version>5.11.4</junit.version>
     <assertj.version>3.27.7</assertj.version>
-    <jackson.version>2.21.7</jackson.version>
-    <jacoco.version>0.8.12</jacoco.version>
+    <jackson.version>2.21.8</jackson.version>
+    <jacoco.version>0.8.16</jacoco.version>
     <jacoco.min.line.coverage>0.90</jacoco.min.line.coverage>
     <jacoco.min.branch.coverage>0.90</jacoco.min.branch.coverage>
     <jacoco.min.method.coverage>0.90</jacoco.min.method.coverage>
     <maven.compiler.release>8</maven.compiler.release>
-    <maven.source.plugin.version>3.3.1</maven.source.plugin.version>
+    <maven.source.plugin.version>3.4.0</maven.source.plugin.version>
     <maven.gpg.plugin.version>3.2.7</maven.gpg.plugin.version>
     <central.publishing.plugin.version>0.10.0</central.publishing.plugin.version>
   </properties>
@@ -109,8 +109,46 @@
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-clean-plugin</artifactId>
+        <version>3.5.0</version>
+        <dependencies>
+          <dependency>
+            <groupId>org.codehaus.plexus</groupId>
+            <artifactId>plexus-utils</artifactId>
+            <version>4.0.3</version>
+          </dependency>
+        </dependencies>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-resources-plugin</artifactId>
+        <version>3.5.0</version>
+        <dependencies>
+          <dependency>
+            <groupId>org.codehaus.plexus</groupId>
+            <artifactId>plexus-utils</artifactId>
+            <version>3.6.1</version>
+          </dependency>
+        </dependencies>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-install-plugin</artifactId>
+        <version>3.2.0</version>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-deploy-plugin</artifactId>
+        <version>3.2.0</version>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
-        <version>3.4.2</version>
+        <version>3.5.1</version>
         <configuration>
           <archive>
             <manifest>
@@ -124,6 +162,18 @@
         <groupId>org.jetbrains.kotlin</groupId>
         <artifactId>kotlin-maven-plugin</artifactId>
         <version>${kotlin.version}</version>
+        <dependencies>
+          <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>2.21.0</version>
+          </dependency>
+          <dependency>
+            <groupId>org.codehaus.plexus</groupId>
+            <artifactId>plexus-utils</artifactId>
+            <version>3.6.1</version>
+          </dependency>
+        </dependencies>
         <executions>
           <execution>
             <id>compile</id>
@@ -153,7 +203,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.13.0</version>
+        <version>3.16.0</version>
         <configuration>
           <release>${maven.compiler.release}</release>
         </configuration>
@@ -172,6 +222,13 @@
         <groupId>org.jacoco</groupId>
         <artifactId>jacoco-maven-plugin</artifactId>
         <version>${jacoco.version}</version>
+        <dependencies>
+          <dependency>
+            <groupId>org.codehaus.plexus</groupId>
+            <artifactId>plexus-utils</artifactId>
+            <version>3.6.1</version>
+          </dependency>
+        </dependencies>
         <executions>
           <execution>
             <id>prepare-agent</id>
@@ -237,7 +294,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-enforcer-plugin</artifactId>
-        <version>3.5.0</version>
+        <version>3.7.0</version>
         <executions>
           <execution>
             <id>enforce-java</id>
