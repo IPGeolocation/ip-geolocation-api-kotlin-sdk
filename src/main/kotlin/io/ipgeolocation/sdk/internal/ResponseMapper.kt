@@ -18,15 +18,23 @@ import io.ipgeolocation.sdk.exceptions.UnsupportedMediaTypeException
 import io.ipgeolocation.sdk.model.BulkLookupError
 import io.ipgeolocation.sdk.model.BulkLookupResult
 import io.ipgeolocation.sdk.model.IpGeolocationResponse
+import java.io.IOException
 
 internal class ResponseMapper(
     private val objectMapper: ObjectMapper,
+    apiKey: String? = null,
 ) {
+    private val errors = ErrorSanitizer(apiKey)
+
     fun <T> readBody(body: String, type: Class<T>): T {
+        val root = parseJson(body, "Failed to deserialize API response")
+        if (!root.isObject) {
+            throw SerializationException("Failed to deserialize API response: expected an object payload")
+        }
         try {
-            return objectMapper.readValue(body, type)
+            return objectMapper.treeToValue(root, type) ?: throw IOException("Expected a JSON object")
         } catch (error: Exception) {
-            throw SerializationException("Failed to deserialize API response", error)
+            throw SerializationException("Failed to deserialize API response", errors.cause(error))
         }
     }
 
@@ -37,14 +45,17 @@ internal class ResponseMapper(
         }
 
         return root.map { node ->
+            if (!node.isObject) {
+                throw SerializationException("Failed to deserialize bulk response: expected an object for each result")
+            }
             val errorMessage = extractBulkErrorMessage(node)
             if (!errorMessage.isNullOrBlank()) {
-                BulkLookupResult(error = BulkLookupError(errorMessage))
+                BulkLookupResult(error = BulkLookupError(errors.message(errorMessage)!!))
             } else {
                 try {
                     BulkLookupResult(data = objectMapper.treeToValue(node, IpGeolocationResponse::class.java))
                 } catch (error: Exception) {
-                    throw SerializationException("Failed to deserialize API response", error)
+                    throw SerializationException("Failed to deserialize API response", errors.cause(error))
                 }
             }
         }
@@ -58,6 +69,17 @@ internal class ResponseMapper(
             "API request failed with HTTP status $statusCode: $apiMessage"
         }
 
+        return apiException(statusCode, message, apiMessage)
+    }
+
+    fun sanitizeApiException(error: ApiException): ApiException {
+        val message = errors.message(error.message)
+        val apiMessage = errors.message(error.apiMessage)
+        if (message == error.message && apiMessage == error.apiMessage && !errors.containsKey(error)) return error
+        return apiException(error.statusCode, message.orEmpty(), apiMessage)
+    }
+
+    private fun apiException(statusCode: Int, message: String, apiMessage: String?): ApiException {
         return when (statusCode) {
             400 -> BadRequestException(message, statusCode, apiMessage)
             401 -> UnauthorizedException(message, statusCode, apiMessage)
@@ -91,16 +113,13 @@ internal class ResponseMapper(
 
     private fun parseJson(body: String, message: String): JsonNode {
         try {
-            return objectMapper.readTree(body)
+            return objectMapper.readTree(body) ?: throw IOException("Expected a JSON value")
         } catch (error: Exception) {
-            throw SerializationException(message, error)
+            throw SerializationException(message, errors.cause(error))
         }
     }
 
     private fun extractBulkErrorMessage(node: JsonNode): String? {
-        if (!node.isObject) {
-            return null
-        }
         return directText(node.get("message"))
             ?: directText(node.get("error"))
             ?: directText(node.get("detail"))
@@ -115,15 +134,15 @@ internal class ResponseMapper(
         val normalized = body.trim()
         return try {
             val root = objectMapper.readTree(normalized)
-            directText(root)
+            val message = directText(root)
                 ?: directText(root.get("message"))
                 ?: directText(root.get("error"))
                 ?: directText(root.get("detail"))
                 ?: directText(root.get("error")?.get("message"))
                 ?: directText(root.get("detail")?.get("message"))
-                ?: truncate(normalized)
+            if (message == null) truncate(errors.message(normalized)!!) else errors.message(message)
         } catch (_: Exception) {
-            truncate(normalized)
+            truncate(errors.message(normalized)!!)
         }
     }
 

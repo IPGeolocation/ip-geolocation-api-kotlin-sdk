@@ -1,6 +1,7 @@
 package io.ipgeolocation.sdk.internal
 
 import io.ipgeolocation.sdk.IpGeolocationClientConfig
+import io.ipgeolocation.sdk.exceptions.TransportException
 import java.io.BufferedReader
 import java.io.IOException
 import java.io.InputStream
@@ -14,8 +15,9 @@ internal class JavaNetHttpExecutor(
     connectTimeout: Duration,
     private val maxResponseBodyChars: Int = DEFAULT_MAX_RESPONSE_BODY_CHARS,
     private val connectionFactory: ConnectionFactory = DefaultConnectionFactory(),
+    private val requireOriginHeader: Boolean = false,
 ) : HttpExecutor {
-    private val connectTimeoutMillis: Int = toMillis(connectTimeout)
+    private val connectTimeoutMillis: Int = timeoutMillis(connectTimeout)
 
     init {
         require(!connectTimeout.isZero && !connectTimeout.isNegative) { "connectTimeout must be greater than zero" }
@@ -27,9 +29,15 @@ internal class JavaNetHttpExecutor(
         var keepAliveEligible = false
         try {
             connection.connectTimeout = connectTimeoutMillis
-            connection.readTimeout = toMillis(request.timeout)
+            connection.readTimeout = timeoutMillis(request.timeout)
             connection.requestMethod = request.method
             applyHeaders(connection, request.headers)
+            if (requireOriginHeader && connection.getRequestProperty("Origin") == null) {
+                throw TransportException(
+                    "Java blocked the Origin header. Start Java with -Dsun.net.http.allowRestrictedHeaders=true for request-origin authentication.",
+                    null,
+                )
+            }
             writeBodyIfPresent(connection, request)
             val statusCode = connection.responseCode
             val response = HttpResponseData(
@@ -110,11 +118,6 @@ internal class JavaNetHttpExecutor(
             normalized[name] = values?.toList() ?: emptyList()
         }
         return normalized.toMap()
-    }
-
-    private fun toMillis(duration: Duration): Int {
-        val millis = duration.toMillis()
-        return if (millis > Int.MAX_VALUE) Int.MAX_VALUE else millis.toInt()
     }
 
     internal fun interface ConnectionFactory {

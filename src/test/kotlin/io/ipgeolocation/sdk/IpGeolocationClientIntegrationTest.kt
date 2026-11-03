@@ -2,6 +2,7 @@ package io.ipgeolocation.sdk
 
 import com.sun.net.httpserver.HttpServer
 import io.ipgeolocation.sdk.exceptions.UnauthorizedException
+import io.ipgeolocation.sdk.exceptions.TransportException
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Assumptions
@@ -12,8 +13,43 @@ import java.net.InetSocketAddress
 import java.net.SocketException
 import java.nio.charset.StandardCharsets
 import java.time.Duration
+import java.util.concurrent.atomic.AtomicInteger
 
 class IpGeolocationClientIntegrationTest {
+    @Test
+    fun originAuthenticationRequiresTheHeaderAndKeyAuthenticationRemainsAvailable() {
+        val server = createServerOrSkip() ?: return
+        val requests = AtomicInteger()
+        server.createContext("/v3/ipgeo") { exchange ->
+            requests.incrementAndGet()
+            val authenticated = exchange.requestURI.query.contains("apiKey=local-key") ||
+                exchange.requestHeaders.getFirst("Origin") == "https://app.example.com"
+            val body = "{}".toByteArray(StandardCharsets.UTF_8)
+            exchange.sendResponseHeaders(if (authenticated) 200 else 401, body.size.toLong())
+            exchange.responseBody.use { it.write(body) }
+        }
+        server.start()
+        try {
+            val baseUrl = "http://127.0.0.1:${server.address.port}"
+            IpGeolocationClient(IpGeolocationClientConfig(requestOrigin = "https://app.example.com", baseUrl = baseUrl)).use { client ->
+                if (java.lang.Boolean.getBoolean("sun.net.http.allowRestrictedHeaders")) {
+                    assertThat(client.lookupIpGeolocation().metadata.statusCode).isEqualTo(200)
+                    assertThat(requests.get()).isEqualTo(1)
+                } else {
+                    assertThatThrownBy { client.lookupIpGeolocation() }
+                        .isInstanceOf(TransportException::class.java)
+                        .hasMessageContaining("-Dsun.net.http.allowRestrictedHeaders=true")
+                    assertThat(requests.get()).isZero()
+                }
+            }
+            IpGeolocationClient(IpGeolocationClientConfig(apiKey = "local-key", requestOrigin = "https://app.example.com", baseUrl = baseUrl)).use { client ->
+                assertThat(client.lookupIpGeolocation().metadata.statusCode).isEqualTo(200)
+            }
+        } finally {
+            server.stop(0)
+        }
+    }
+
     @Test
     fun performsSingleLookupAgainstLocalHttpServer() {
         val server = createServerOrSkip() ?: return

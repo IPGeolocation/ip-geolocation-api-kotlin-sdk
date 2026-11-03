@@ -1,6 +1,7 @@
 package io.ipgeolocation.sdk
 
 import io.ipgeolocation.sdk.exceptions.ValidationException
+import io.ipgeolocation.sdk.internal.durationMillis
 import java.net.URI
 import java.time.Duration
 
@@ -30,8 +31,8 @@ class IpGeolocationClientConfig @JvmOverloads constructor(
             "apiKey" to if (apiKey == null) null else "[REDACTED]",
             "requestOrigin" to requestOrigin,
             "baseUrl" to baseUrl,
-            "connectTimeoutMs" to connectTimeout.toMillis(),
-            "readTimeoutMs" to readTimeout.toMillis(),
+            "connectTimeoutMs" to durationMillis(connectTimeout),
+            "readTimeoutMs" to durationMillis(readTimeout),
             "maxResponseBodyChars" to maxResponseBodyChars,
         )
     }

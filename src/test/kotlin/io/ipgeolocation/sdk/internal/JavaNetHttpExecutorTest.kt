@@ -18,6 +18,26 @@ import java.time.Duration
 
 class JavaNetHttpExecutorTest {
     @Test
+    fun positiveTimeoutsStayBoundedWithoutOverflow() {
+        val cases = listOf(
+            Duration.ofNanos(1) to 1,
+            Duration.ofNanos(999_999) to 1,
+            Duration.ofMillis(1) to 1,
+            Duration.ofSeconds(30) to 30_000,
+            Duration.ofMillis(Int.MAX_VALUE.toLong()) to Int.MAX_VALUE,
+            Duration.ofMillis(Int.MAX_VALUE.toLong() + 1) to Int.MAX_VALUE,
+            Duration.ofSeconds(Long.MAX_VALUE) to Int.MAX_VALUE,
+        )
+        for ((duration, expected) in cases) {
+            val connection = StubHttpURLConnection(URL("https://example.invalid"), 200, "{}", emptyMap())
+            val executor = JavaNetHttpExecutor(duration, connectionFactory = JavaNetHttpExecutor.ConnectionFactory { connection })
+            executor.send(HttpRequestData(URI("https://example.invalid"), "GET", emptyMap(), timeout = duration))
+            assertThat(connection.connectTimeout).isEqualTo(expected)
+            assertThat(connection.readTimeout).isEqualTo(expected)
+        }
+    }
+
+    @Test
     fun rejectsInvalidConstructorArguments() {
         assertThatThrownBy { JavaNetHttpExecutor(Duration.ZERO) }
             .isInstanceOf(IllegalArgumentException::class.java)

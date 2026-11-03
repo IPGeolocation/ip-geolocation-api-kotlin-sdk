@@ -35,20 +35,20 @@ Maven:
 <dependency>
   <groupId>io.ipgeolocation</groupId>
   <artifactId>ipgeolocation-kotlin-sdk</artifactId>
-  <version>1.0.1</version>
+  <version>1.0.2</version>
 </dependency>
 ```
 
 Gradle Kotlin DSL:
 
 ```kotlin
-implementation("io.ipgeolocation:ipgeolocation-kotlin-sdk:1.0.1")
+implementation("io.ipgeolocation:ipgeolocation-kotlin-sdk:1.0.2")
 ```
 
 Gradle Groovy:
 
 ```groovy
-implementation 'io.ipgeolocation:ipgeolocation-kotlin-sdk:1.0.1'
+implementation 'io.ipgeolocation:ipgeolocation-kotlin-sdk:1.0.2'
 ```
 
 - Maven Central coordinates: `io.ipgeolocation:ipgeolocation-kotlin-sdk`
@@ -105,7 +105,7 @@ You can also call `lookupIpGeolocation()` with no request object to resolve the 
 | Supported Endpoints | `/v3/ipgeo`, `/v3/ipgeo-bulk` |
 | Supported Inputs | IPv4, IPv6, domain |
 | Main Data Returned | Geolocation, company, ASN, time zone, network, hostname, abuse, user-agent, currency, security |
-| Authentication | API key, request-origin auth for `/v3/ipgeo` only |
+| Authentication | API key |
 | Response Formats | Typed JSON, raw JSON, raw XML |
 | Bulk Limit | Up to 50,000 IPs or domains per request |
 | Transport | JDK `HttpURLConnection` |
@@ -120,7 +120,7 @@ Create an IPGeolocation.io account and copy an API key from your dashboard.
 4. Open your dashboard: <https://app.ipgeolocation.io/dashboard>
 5. Copy an API key from the `API Keys` section
 
-For server-side Kotlin code, keep the API key in an environment variable or secret manager. For browser-based single lookups on paid plans, use request-origin auth instead of exposing an API key in frontend code.
+For server-side Kotlin code, keep the API key in an environment variable or secret manager.
 
 ## Authentication
 
@@ -134,23 +134,7 @@ val client = IpGeolocationClient(
 )
 ```
 
-### Request-Origin Auth
-
-```kotlin
-val client = IpGeolocationClient(
-    IpGeolocationClientConfig(
-        requestOrigin = "https://app.example.com",
-    ),
-)
-```
-
-`requestOrigin` must be an absolute `http` or `https` origin with no path, query string, fragment, or userinfo.
-
-> [!IMPORTANT]
-> Request-origin auth does not work with `/v3/ipgeo-bulk`. Bulk lookup always requires `apiKey`.
-
-> [!NOTE]
-> If you set both `apiKey` and `requestOrigin`, single lookup still uses the API key. The API key is sent as the `apiKey` query parameter, so avoid logging full request URLs.
+The API key is sent as the `apiKey` query parameter, so avoid logging full request URLs.
 
 ## Plan Behavior
 
@@ -162,7 +146,6 @@ Feature availability depends on your plan and request parameters.
 | Domain lookup | Not supported | Supported |
 | Bulk lookup | Not supported | Supported |
 | Non-English `lang` | Not supported | Supported |
-| Request-origin auth | Not supported | Supported for `/v3/ipgeo` only |
 | Optional modules via `include` | Not supported | Supported |
 | `include = listOf("*")` | Base response only | All plan-available modules |
 
@@ -172,8 +155,7 @@ Paid plans still need `include` for optional modules. `fields` and `excludes` on
 
 | Field | Type | Default | Notes |
 |-------|------|---------|-------|
-| `apiKey` | `String?` | unset | Required for bulk lookup. Optional for single lookup if `requestOrigin` is set. |
-| `requestOrigin` | `String?` | unset | Must be an absolute `http` or `https` origin with no path, query string, fragment, or userinfo. |
+| `apiKey` | `String?` | unset | API key for authenticating requests. |
 | `baseUrl` | `String` | `https://api.ipgeolocation.io` | Override the API base URL. |
 | `connectTimeout` | `Duration` | `Duration.ofSeconds(10)` | Time to open the connection. Must be greater than zero and must be less than or equal to `readTimeout`. |
 | `readTimeout` | `Duration` | `Duration.ofSeconds(30)` | Time to wait while reading the response body. Must be greater than zero and must be greater than or equal to `connectTimeout`. |
@@ -201,7 +183,7 @@ Config values are validated when the client is created. Request values are valid
 |-------|------------|-------|
 | `ip` | Single lookup | IPv4, IPv6, or domain. Leave it empty for caller IP lookup. |
 | `ips` | Bulk lookup | List of 1 to 50,000 IPs or domains. |
-| `lang` | Single and bulk | `Language.EN`, `DE`, `RU`, `JA`, `FR`, `CN`, `ES`, `CS`, `IT`, `KO`, `FA`, or `PT`. |
+| `lang` | Single and bulk | `Language.EN`, `DE`, `RU`, `JA`, `FR`, `CN`, `ES`, `CS`, `IT`, `KO`, `FA`, `PT`, or `AR` (Arabic). |
 | `include` | Single and bulk | List of module names such as `security`, `abuse`, `user_agent`, `hostname`, `liveHostname`, `hostnameFallbackLive`, `geo_accuracy`, `dma_code`, or `*`. |
 | `fields` | Single and bulk | List of field paths to keep, for example `location.country_name` or `security.threat_score`. |
 | `excludes` | Single and bulk | List of field paths to remove from the response. |
@@ -392,7 +374,7 @@ println(full)
 
 ## Errors
 
-The SDK throws typed exceptions instead of leaving you to parse error bodies yourself.
+The SDK throws typed exceptions instead of leaving you to parse error bodies yourself. If an error includes your configured API key, the SDK replaces it with `[REDACTED]`. SDK error types and HTTP status codes stay the same. Some technical error details may be shortened to keep the key hidden.
 
 | Error Type | When it happens |
 |------------|-----------------|
@@ -434,22 +416,16 @@ try {
 
 ## Troubleshooting
 
-- Bulk lookup always requires `apiKey`. `requestOrigin` is not enough.
+- Bulk lookup always requires `apiKey`.
 - Typed methods only support JSON. Use the raw methods for XML.
 - If you need security, abuse, user-agent, or hostname data, include those modules explicitly.
 - `fields` and `excludes` filter the response. They do not unlock paid data.
-- `requestOrigin` must be an origin only. Do not include a path, query string, fragment, or userinfo.
 - Response fields are nullable so omitted fields stay omitted.
 - `connectTimeout` must be less than or equal to `readTimeout`.
 - The SDK rejects responses larger than `maxResponseBodyChars`. The default cap is `32 MiB`.
 - If Maven prints `sun.misc.Unsafe` warnings from `kotlin-compiler` during local builds, run Maven with JDK 21 LTS. That warning is from the current Kotlin compiler toolchain, not from the SDK runtime.
 
 ## Frequently Asked Questions
-
-<details>
-<summary>Can I use this SDK without an API key?</summary>
-Only for single lookup with paid-plan request-origin auth. Bulk lookup always requires an API key.
-</details>
 
 <details>
 <summary>Can I request XML and still get typed models?</summary>
